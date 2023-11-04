@@ -60,10 +60,12 @@
 <body class="no-drag">
     ${top-nav-bar}
     <div id="main-div" class="pannel-main">
-        <h1 class="title" style="display: block; height: 48px; margin-top: 0; margin-bottom: 0; font-family: 'Apple Garamond Light', serif; font-weight:lighter;">ROLLING NOVELS</h1>
+        <h1 class="title" style="display: block; height: 48px; margin-top: 0; margin-bottom: 16px;  font-weight:lighter;">분리수거링</h1>
+        <h2 class="title" style="display: block; height: 48px; margin-top: 0; margin-bottom: 0;  font-weight:lighter;">${user-id}님,</h2>
+        <h2 class="title" style="display: block; height: 48px; margin-top: 0; margin-bottom: 0;  font-weight:lighter;">현재 ${point}포인트가 있습니다.</h2>
+        
         <!--<img id="main-img" src="img/main-img.png" alt="메인 이미지">-->
         <div class="book-list">
-            <button class="book-surface" id="book-add-btn" onclick="location.href='/novel/new'">+</button>
             ${list-novels}
         </div>
     </div>

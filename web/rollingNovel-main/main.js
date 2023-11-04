@@ -204,13 +204,12 @@ app.get('/', function(request, response) {
   for(var i = 0; i < novelFileList.length; i++){
     novelList[i] = JSON.parse(fs.readFileSync(dirPath + '/' + novelFileList[i]))
   }
-  novelList.sort((a, b) => b.time - a.time)
+  novelList.sort((a, b) => a.id - b.id)
   for(var i = 0; i < novelList.length; i++){
     btnsText += `
-    <button class="book-surface" onclick="location.href='/novel/view/${novelList[i].id}'"><span>${novelList[i].title}</span>
-    <span style="font-size: 0.6em;"><br>${getTermText(novelList[i].time)}</span></button>`
+    <button class="book-surface" onclick="location.href='/novel/view/${novelList[i].id}'"><span>${novelList[i].title}</span></button>`
   }
-  html = changeElements(html, [{'key': 'list-novels', 'value': btnsText}])
+  html = changeElements(html, [{'key': 'list-novels', 'value': btnsText}, {'key': 'user-id', 'value': request.session.user_id}])
 
   response.send(topNavAddHTML(html, request))
 });
@@ -227,6 +226,36 @@ app.get('/login', function(request, response) {
     response.send(topNavAddHTML(html, request))
   }
 });
+
+//글 읽기
+app.get('/novel/view/:id', function(request, response) {
+  //파일 경로
+  novelFilePath = './novels/' + request.params['id'] + '.json'
+  console.log(novelFilePath)
+  if(fs.existsSync(novelFilePath)){ //파일이 있는가?
+    var html = readHTML('novel-view') //html 불러오기
+    var novelFile = JSON.parse(fs.readFileSync(novelFilePath)) //파일 열기
+    var paragraphText = ''
+    for(var i = 0; i < novelFile.paragraph.length; i++){
+      paragraphText += toHTMLText(novelFile.paragraph[i].history[novelFile.paragraph[i].history.length - 1].text) + (i == novelFile.paragraph.length - 1 ? '' : '<br>')
+    }
+
+    var peopleList = []
+    for(var i = 0; i < novelFile.paragraph.length; i++){
+      if(peopleList.indexOf(toHTMLText(novelFile.paragraph[i].author)) == -1 && toHTMLText(novelFile.paragraph[i].author) != novelFile.author){
+        peopleList[peopleList.length] = toHTMLText(novelFile.paragraph[i].author)
+      }
+    }
+    var peopleText = '생성자: ' + novelFile.author + '<br>기여자: ' + peopleList.join(', ');
+
+    html = changeElements(html, [{'key': 'novel-title', 'value': novelFile.title}, {'key': 'novel-text', 'value': paragraphText}, {'key': 'novel-id', 'value': novelFile.id}, {'key': 'people-text', 'value': peopleText}])
+  }
+  else{
+    var html = readHTML('main') + '<script>alert("잘못된 접근입니다."); location.replace("/")</script>'
+  }
+  response.send(topNavAddHTML(html, request))
+});
+
 
 //채팅 서비스 이용
 app.get('/chat', function(request, response) {

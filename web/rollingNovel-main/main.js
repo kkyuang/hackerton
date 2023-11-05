@@ -269,6 +269,25 @@ app.get('/chat', function(request, response) {
 });
 
 
+//쓰레기통의 웹페이지 코드
+
+
+//메인 화면
+app.get('/trashbin', function(request, response) {
+  var html = readHTML('trashbin-main')
+  response.send(html)
+});
+
+
+
+
+//채팅 서비스 이용
+app.get('/trashbin/image', function(request, response) {
+    var html = readHTML('perceive-image')
+    response.send(html)
+});
+
+
 //회원가입
 app.post("/signup", function(req,res,next){
   var body = req.body;
@@ -310,6 +329,7 @@ app.post("/login", function(req,res,next){
     }
   }
 })
+
 
 
 //소켓 통신
@@ -390,6 +410,11 @@ app.get('/css/:name', function(request, response) {
 //js 라우팅
 app.get('/js/:name', function(request, response) {
   response.send(fs.readFileSync('js/' + request.params.name))
+});
+
+//모델 라우팅
+app.get('/model/:name', function(request, response) {
+  response.send(fs.readFileSync('model/' + request.params.name))
 });
 
 //폰트 라우팅

@@ -1,0 +1,101 @@
+<head>
+
+    <meta charset="UTF-8">
+    <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="http://fonts.googleapis.com/earlyaccess/notosanskr.css" rel="stylesheet">
+    <title>분리수거링</title>
+    <meta name="title" content="분리수거링">
+    <meta name="author" content="조조도조">
+    <meta property="og:title" content="분리수거링" />
+    <meta property="og:description" content="분리수거 포인트 적립" />
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <style>
+        .title {
+            font-size: 48px;
+            font-family: sans-serif;
+            font-weight: lighter;
+            margin-top: 32px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+
+<h1 class="title">쓰레기 인식하기</h1>
+<div style="position: absolute; top: 120px; left: 50%; transform: translate(-50%, 0%);" id="webcam-container"></div>
+
+<h1 class="title" style="margin-top: 540px;" id="label-container"> </h1>
+<button class="main-btn" onclick="location.href='/trashbin/image'">쓰레기통 개방하기</button>
+
+
+<script type="text/javascript">
+
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+    // the link to your model provided by Teachable Machine export panel
+    const URL = "../model/";
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    // Load the image model and setup the webcam
+    async function init() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        // load the model and metadata
+        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+        // or files from your local hard drive
+        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(480, 480, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+
+        // append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+    }
+
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        // predict can take in an image, video or canvas html element
+        var prediction = await model.predict(webcam.canvas);
+        prediction.sort(function (a, b) {
+            if (a.probability < b.probability) return 1;
+            if (a.probability > b.probability) return -1;
+            if (a.probability === b.probability) return 0;
+        });
+            dict = {'vinyl': '비닐', 'pet': '페트병', 'can': '캔', 'plastic': '플라스틱', 'paper': '종이', 'glass': '유리'}
+        
+            const classPrediction =
+                "종류는 " + dict[prediction[0].className] + "입니다.";
+            labelContainer.innerHTML = classPrediction;
+
+    }
+
+    $(() => {
+
+        init()
+    })
+
+
+</script>

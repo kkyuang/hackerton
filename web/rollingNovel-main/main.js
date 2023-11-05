@@ -209,7 +209,12 @@ app.get('/', function(request, response) {
     btnsText += `
     <button class="book-surface" onclick="location.href='/novel/view/${novelList[i].id}'"><span>${novelList[i].title}</span></button>`
   }
-  html = changeElements(html, [{'key': 'list-novels', 'value': btnsText}, {'key': 'user-id', 'value': request.session.user_id}])
+
+  pointText = '로그인되지 않았습니다.<br><br>좌측 상단에서<br>로그인 또는 회원가입 부탁드립니다.'
+  if(request.session.logined){
+    pointText = `${request.session.user_id}님,<br><br>현재 ${request.session.point}포인트가 있습니다.`
+  }
+  html = changeElements(html, [{'key': 'list-novels', 'value': btnsText}, {'key': 'point-text', 'value': pointText}])
 
   response.send(topNavAddHTML(html, request))
 });
@@ -323,6 +328,11 @@ io.on('connection', (socket) => {
       topCATR: getChoiceRank(0).CATR,
       topCATRuser: getChoiceRank(0).user_id
     })
+  })
+
+  socket.on('hello', (data)=>{
+    console.log(data)
+    socket.emit('hello', 'hello')
   })
 
   socket.on('topCATRreq-question', (data)=>{
